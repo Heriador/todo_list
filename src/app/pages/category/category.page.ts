@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Category } from 'src/app/interfaces/category.interface';
 import { User } from 'src/app/interfaces/user.interface';
 import { CategoryService } from 'src/app/services/category/category.service';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 
 @Component({
@@ -17,6 +18,8 @@ export class CategoryPage implements OnInit {
   public createCategoryForm: FormGroup
   public updateCategoryForm: FormGroup
 
+  canCreateCategories: boolean = false;
+
   isModalOpen: boolean = false;
   isUpdateModalOpen: boolean = false;
   private selectedCategory: Category | null = null;
@@ -26,7 +29,8 @@ export class CategoryPage implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly categoryService: CategoryService,
-    private readonly utilsService: UtilsService
+    private readonly utilsService: UtilsService,
+    private readonly firebaseService: FirebaseService
   ) {
 
     this.createCategoryForm = this.formBuilder.group({
@@ -40,10 +44,15 @@ export class CategoryPage implements OnInit {
       description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]]
     })
 
+    
+
   }
 
   async ngOnInit() {
     this.loading = await this.utilsService.loading();
+    this.firebaseService.activateAddCategory().then((response) => {
+      this.canCreateCategories = response
+    });
   }
 
   ionViewWillEnter() {
