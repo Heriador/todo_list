@@ -32,10 +32,10 @@ export class FirebaseService {
     return createUserWithEmailAndPassword(getAuth(), user.email, user.password);
   }
 
-  signOut(){
-    getAuth().signOut();
+  async signOut(){
+    await getAuth().signOut();
     localStorage.removeItem('user');
-    this.utilsService.routerLink('/login');
+    this.utilsService.routerLink('/auth');
   }
 
   updateUser(displayName: string) {
