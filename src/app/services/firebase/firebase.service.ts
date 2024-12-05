@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword, getAuth, createUserWithEmailAndPassword, up
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { getFirestore, setDoc, doc, getDoc } from '@angular/fire/firestore';
 import { UtilsService } from '../utils/utils.service';
+import { AngularFireRemoteConfig } from '@angular/fire/compat/remote-config';
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +16,8 @@ export class FirebaseService {
   constructor(
     private readonly firebaseAuth: AngularFireAuth,
     private readonly firestore: AngularFirestore,
-    private readonly utilsService: UtilsService
+    private readonly utilsService: UtilsService,
+    private readonly remoteConfig: AngularFireRemoteConfig
   ) { }
 
   getAuth(){
@@ -50,6 +53,10 @@ export class FirebaseService {
 
   async getDocument(path: string) {
     return (await getDoc(doc(getFirestore(), path))).data();
+  }
+
+  activateAddCategory(){
+    return this.remoteConfig.getBoolean('enableCreateCategories');
   }
 
 }
