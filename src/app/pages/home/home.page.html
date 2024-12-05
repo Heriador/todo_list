@@ -1,0 +1,89 @@
+<app-header
+  title="HOME"
+></app-header>
+
+<ion-content [fullscreen]="true">
+
+  <ion-searchbar 
+    showClearButton="true"
+    showCancelButton="focus"
+    cancelButtonText="Cancelar"
+    searchIcon="search-outline"
+    placeholder="Filtrar por categoria" 
+    (ionChange)="onSearchChange($event)" 
+    [debounce]="250" 
+    animated="true"
+  >
+  </ion-searchbar>
+
+  <app-todo-card
+    *ngFor="let todo of todos"
+    [todo]="todo"
+    (deleteTodo)="remove($event)"
+    (completedTodo)="markAsCompleted($event)"
+  ></app-todo-card>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+    <ion-fab-button (click)="openModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isModalOpen" backdropDismiss="false">
+    <ng-content>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>
+            Añadir tarea
+          </ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeModal()">
+              <ion-icon slot="icon-only" name="close" ></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <form class="auth-form" [formGroup]="createTodoForm">
+          <app-custom-input
+            label="Title"
+            type="text"
+            [control]="title"
+          ></app-custom-input>
+          <app-custom-input
+            label="Description"
+            type="text"
+            [control]="description"
+          ></app-custom-input>
+
+          <ion-item class="custom-input">
+            <ion-label>Categoria</ion-label>
+            <ion-select placeholder="Selecciona..." [formControl]="category">
+              <ion-select-option
+                *ngFor="let category of categories"
+                [value]="category.name"
+              >
+              {{ category.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            mode="ios"
+            class="submit"
+            type="submit"
+            (click)="addTodo()"
+            [disabled]="createTodoForm.invalid"
+          >
+            Añadir Tarea
+          </ion-button>
+
+        </form>
+      </ion-content>
+
+    </ng-content>
+  </ion-modal>
+
+</ion-content>

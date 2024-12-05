@@ -1,0 +1,25 @@
+<ion-card>
+    <ion-card-header>
+        <ion-card-title>
+            {{ todo.title }}
+        </ion-card-title>
+        <ion-card-subtitle>
+            {{ todo.category }}
+        </ion-card-subtitle>
+        <ion-item>
+          <ion-label>
+            {{ todo.description }}
+            <p>Estado: {{ todo.completed ? 'completada' : 'no completada' }}</p>
+          </ion-label>
+        </ion-item>
+    </ion-card-header>
+    <ion-card-content>
+       
+        <ion-button color="primary" fill="outline" [disabled]="todo.completed" (click)="markAsCompleted()" >
+          {{ todo.completed ? 'Completada' : 'Marcar como completada' }}
+        </ion-button>
+        <ion-button color="danger" fill="outline" (click)="delete()">
+          Eliminar
+        </ion-button>
+    </ion-card-content>
+</ion-card>

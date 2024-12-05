@@ -1,0 +1,130 @@
+<app-header
+  title="Categorias"
+  contentId="categories"
+></app-header>
+
+<ion-content [fullscreen]="true" id="categories">
+  <ion-list>
+    <ion-item *ngFor="let item of categories">
+      <ion-item lines="inset">
+        <ion-label class="ion-text-nowrap">
+          <h2>{{ item.name}}</h2>
+          <p>{{ item.description }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-button
+        slot="end"
+        color="primary"
+        size="default"
+        (click)="openUpdateModal(item)"
+      >
+        <ion-icon slot="icon-only" name="pencil-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        slot="end"
+        color="danger"
+        size="default"
+        (click)="deleteCategory(item)"
+      >
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list> 
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+    <ion-fab-button (click)="openModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isModalOpen" backdropDismiss="false">
+    <ng-content>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>
+            Añadir Categoria
+          </ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeModal()">
+              <ion-icon slot="icon-only" name="close" ></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+          <form class="auth-form" [formGroup]="createCategoryForm">
+            <app-custom-input
+              label="Name"
+              type="text"
+              [control]="nameCreate"
+            ></app-custom-input>
+            <app-custom-input
+              label="Description"
+              type="text"
+              [control]="descriptionCreate"
+            ></app-custom-input>
+
+            <ion-button
+              expand="block"
+              mode="ios"
+              class="submit"
+              type="submit"
+              (click)="addCategory()"
+              [disabled]="createCategoryForm.invalid"
+            >
+              Añadir categoria
+            </ion-button>
+
+          </form>
+      </ion-content>
+
+    </ng-content>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isUpdateModalOpen" backdropDismiss="false">
+    <ng-content>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>
+            Actualizar categoria
+          </ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeUpdateModal()">
+              <ion-icon slot="icon-only" name="close" ></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+          <form class="auth-form" [formGroup]="updateCategoryForm">
+            <app-custom-input
+              label="Name"
+              type="text"
+              [control]="nameUpdate"
+            ></app-custom-input>
+            <app-custom-input
+              label="Description"
+              type="text"
+              [control]="descriptionUpdate"
+            ></app-custom-input>
+
+            <ion-button
+              expand="block"
+              mode="ios"
+              class="submit"
+              type="submit"
+              (click)="updateCategory()"
+              [disabled]="updateCategoryForm.invalid"
+            >
+              Actualizar categoria
+            </ion-button>
+
+          </form>
+      </ion-content>
+
+    </ng-content>
+  </ion-modal>
+
+</ion-content>
