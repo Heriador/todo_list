@@ -17,7 +17,7 @@
   </ion-searchbar>
 
   <app-todo-card
-    *ngFor="let todo of todos"
+    *ngFor="let todo of filteredTodos"
     [todo]="todo"
     (deleteTodo)="remove($event)"
     (completedTodo)="markAsCompleted($event)"
@@ -62,7 +62,7 @@
             <ion-select placeholder="Selecciona..." [formControl]="category">
               <ion-select-option
                 *ngFor="let category of categories"
-                [value]="category.name"
+                [value]="category.id"
               >
               {{ category.name }}
               </ion-select-option>

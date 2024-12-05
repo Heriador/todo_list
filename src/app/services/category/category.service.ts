@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Category } from 'src/app/interfaces/category.interface';
+import { UtilsService } from '../utils/utils.service';
+import { User } from 'src/app/interfaces/user.interface';
 
 
 @Injectable({
@@ -7,36 +10,41 @@ import { Category } from 'src/app/interfaces/category.interface';
 })
 export class CategoryService {
 
-  private categories: Category[] = JSON.parse(localStorage.getItem("categories") || '[]').length > 0 
-  ? JSON.parse(localStorage.getItem("categories") || '[]') : [
-    {id: 1, name: 'trabajo', description: "wast"},
-    {id: 2, name: 'personal', description: "wast"},
-  ];
+  user = {} as User;
 
-  constructor() { }
+  constructor(
+    private readonly firestore: AngularFirestore,
+    private readonly utilsService: UtilsService
+  ) {
+    this.user = this.utilsService.getFromLocalStorage('user');
+  }
+
+  private getCategoriesCollection(){
+    return this.firestore.collection('users').doc(this.user.uid).collection<Category>('categories');
+  }
 
   getCategories(){
-    return this.categories;
+
+    return this.getCategoriesCollection().valueChanges({ idField: 'id' });
   }
 
  
-  getCategoryById(id: number){
-    return this.categories.find(category => category.id === id);
+  getCategoryById(uid: string){
+    return this.getCategoriesCollection().doc(uid).valueChanges();
   }
 
   addCategory(category: Category){
-    this.categories.push(category);
-    localStorage.setItem("categories", JSON.stringify(this.categories));
+
+    return this.getCategoriesCollection().add(category);
   }
 
   updateCategory(category: Category){
-    const index = this.categories.findIndex(c => c.id === category.id);
-    this.categories[index] = category;
+
+    return this.getCategoriesCollection().doc(category.id).update(category);
   }
 
   deleteCategory(category: Category){
-    const index = this.categories.indexOf(category);
-    this.categories.splice(index, 1);
-    localStorage.setItem("categories", JSON.stringify(this.categories));
+
+    return this.getCategoriesCollection().doc(category.id).delete();
   }
 }

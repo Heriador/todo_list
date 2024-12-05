@@ -31,7 +31,7 @@
     </ion-item>
   </ion-list> 
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+  <ion-fab *ngIf="canCreateCategories" vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
     <ion-fab-button (click)="openModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
@@ -59,11 +59,17 @@
               type="text"
               [control]="nameCreate"
             ></app-custom-input>
+            <div class="validators" *ngIf="getErrorMessage(nameCreate)">
+              {{ getErrorMessage(nameCreate) }}
+            </div>
             <app-custom-input
               label="Description"
               type="text"
               [control]="descriptionCreate"
             ></app-custom-input>
+            <div class="validators" *ngIf="getErrorMessage(descriptionCreate)">
+              {{ getErrorMessage(descriptionCreate) }}
+            </div>
 
             <ion-button
               expand="block"
@@ -104,11 +110,20 @@
               type="text"
               [control]="nameUpdate"
             ></app-custom-input>
+
+            <div class="validators" *ngIf="getErrorMessage(nameUpdate)">
+              {{ getErrorMessage(nameUpdate) }}
+            </div>
+
             <app-custom-input
               label="Description"
               type="text"
               [control]="descriptionUpdate"
             ></app-custom-input>
+
+            <div class="validators" *ngIf="getErrorMessage(descriptionUpdate)">
+              {{ getErrorMessage(descriptionUpdate) }}
+            </div>
 
             <ion-button
               expand="block"

@@ -4,27 +4,33 @@ import { Form, FormBuilder, FormControl, FormGroup, Validators } from '@angular/
 import { CategoryService } from '../../services/category/category.service';
 import { Category } from 'src/app/interfaces/category.interface';
 import { Todo } from 'src/app/interfaces/todo.interface';
+import { User } from 'src/app/interfaces/user.interface';
+import { UtilsService } from 'src/app/services/utils/utils.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
 
   public createTodoForm: FormGroup;
-  public todos: Todo[];
-  public categories: Category[];
+  public todos: Todo[] = [];
+  public filteredTodos: Todo[] = [];
+  public categories: Category[] = [];
 
   isModalOpen: boolean = false;
+
+  user = {} as User;
+  loading!: HTMLIonLoadingElement;
 
   constructor(
     private readonly todoService: TodoService,
     private readonly categoryService: CategoryService,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly utilsService: UtilsService
   ) {
-    this.todos = this.todoService.getTodos();
-    this.categories = this.categoryService.getCategories();
+    
 
     this.createTodoForm = this.formBuilder.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -32,7 +38,15 @@ export class HomePage {
       category: ['', [Validators.required]]
     })
 
+  }
 
+  async ngOnInit() {
+    this.loading = await this.utilsService.loading();
+  }
+
+  ionViewWillEnter() {
+    this.getCategories();
+    this.getTodos();
   }
 
   get title(): FormControl<any>{
@@ -63,28 +77,155 @@ export class HomePage {
     return '';
   }
 
-  remove(todo: Todo){
-    this.todoService.deleteTodo(todo);
-    this.todos = this.todoService.getTodos();
-  }
+  async getTodos(){
 
-  addTodo(){
-    if(this.createTodoForm.valid){
-      let todo: Todo = {
-        id: this.todos.length + 1,
-        ...this.createTodoForm.value,
-        completed: false
+    await this.loading.present();
+
+    let sub = this.todoService.getTodos().subscribe({
+      next: (todos: Todo[]) => {
+        console.log(todos);
+        this.todos = todos;
+        this.todos = this.todos.map(todo => {
+          todo.category = this.categories.find(c => c.id === todo.category)?.name ?? 'Sin categoria';
+          return todo;
+        });
+        this.filteredTodos = this.todos;
+        sub.unsubscribe();
+      },
+      error: (error) => {
+        console.error(error);
+        this.utilsService.presentToast({
+          message: 'Error al obtener las tareas',
+          duration: 2000,
+          color: 'danger',
+          position: 'top'
+        })
       }
-      this.todoService.addTodo(todo);
-      this.todos = this.todoService.getTodos();
-      this.createTodoForm.reset();
-      this.closeModal();
-    }
+    });
+
+    sub.add(() => {
+      this.loading.dismiss();
+    });
+
   }
 
-  markAsCompleted(todo: Todo){
-    this.todoService.changeCompletedStatus(todo.id);
-    this.todos = this.todoService.getTodos();
+  async getCategories(){
+
+    await this.loading.present();
+
+    let sub = this.categoryService.getCategories().subscribe({
+      next: (response) => {
+        console.log(response);
+        this.categories = response;
+        sub.unsubscribe();
+      },
+      error: (error) => {
+        console.error(error);
+        this.utilsService.presentToast({
+          message: 'Error al obtener las categorias',
+          duration: 2000,
+          color: 'danger',
+          position: 'top'
+        })
+      }
+    })
+
+    sub.add(() => {
+      this.loading.dismiss();
+    })
+  }
+
+  async remove(todo: Todo){
+    await this.loading.present();
+    this.todoService.deleteTodo(todo).then(()=> {
+      this.utilsService.presentToast({
+        message: 'Tarea eliminada',
+        duration: 1000,
+        color: 'success',
+        position: 'top'
+      })
+
+      this.todos = this.todos.filter(t => t.id !== todo.id);
+      this.filteredTodos = this.todos;
+    })
+    .catch((error) => {
+      this.utilsService.presentToast({
+        message: 'Error al eliminar la tarea',
+        duration: 2000,
+        color: 'danger',
+        position: 'top'
+      })
+    })
+    .finally(() => {
+      this.loading.dismiss();
+    });
+  }
+
+  async addTodo(){
+
+    if(this.createTodoForm.invalid){
+      this.createTodoForm.markAllAsTouched();
+    }
+
+    await this.loading.present();
+
+    this.todoService.addTodo(this.createTodoForm.value).then((response) => {
+      console.log(response);
+      this.utilsService.presentToast({
+        message: 'Tarea creada',
+        duration: 2000,
+        color: 'success',
+        position: 'top'
+      })
+
+      const category = this.categories.find(c => c.id === this.createTodoForm.value.category)?.name ?? 'Sin categoria';
+
+      this.todos.push({id: response.id, ...this.createTodoForm.value, category: category});
+
+      this.createTodoForm.reset({
+        title: '',
+        description: '',
+        category: ''
+      });
+      this.closeModal()
+    })
+    .catch((error) => {
+      this.utilsService.presentToast({
+        message: 'Error al crear la tarea',
+        duration: 2000,
+        color: 'danger',
+        position: 'top'
+      })
+    })
+    .finally(() => {
+      this.loading.dismiss();
+    });
+
+  }
+
+  async markAsCompleted(todo: Todo){
+    await this.loading.present();
+    this.todoService.changeCompletedStatus(todo.id).then(() => {
+      this.utilsService.presentToast({
+        message: 'Tarea completada',
+        duration: 2000,
+        color: 'success',
+        position: 'top'
+      })
+      this.todos = this.todos.map(t => t.id === todo.id ? {...t, completed: true} : t);
+      this.filteredTodos = this.todos;
+    })
+    .catch((error) => {
+      this.utilsService.presentToast({
+        message: 'Error al completar la tarea',
+        duration: 2000,
+        color: 'danger',
+        position: 'top'
+      })
+    })
+    .finally(() => {
+      this.loading.dismiss();
+    });
   }
 
   openModal(){
@@ -101,8 +242,13 @@ export class HomePage {
   }
 
   onSearchChange(event: any){
-    const query = event.target.value.toLowerCase();
-    this.todos = this.todoService.getTodos().filter(todo => todo.category.toLowerCase().includes(query));
+    const query = event.detail.value;
+    if(!query){
+      this.filteredTodos = this.todos
+    }
+    else{
+      this.filteredTodos = this.todos.filter(todo => todo.category.toLowerCase().includes(query.toLowerCase()));
+    }
   }
 
 
