@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +14,7 @@ export class HeaderComponent  implements OnInit {
 
   constructor(
     private readonly router: Router,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   ngOnInit() {}
@@ -23,6 +25,10 @@ export class HeaderComponent  implements OnInit {
 
   goCategory(){
     this.router.navigate(['/category']);
+  }
+
+  signOut(){
+    this.firebaseService.signOut();
   }
 
 }
