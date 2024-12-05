@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Todo } from 'src/app/interfaces/todo.interface';
-import { getFirestore, addDoc, collection } from '@angular/fire/firestore';
 import { UtilsService } from '../utils/utils.service';
 import { User } from 'src/app/interfaces/user.interface';
 
@@ -10,14 +9,6 @@ import { User } from 'src/app/interfaces/user.interface';
   providedIn: 'root'
 })
 export class TodoService {
-
-  private todos: Todo[] = JSON.parse(localStorage.getItem("todos") || '[]').length > 0 ? JSON.parse(localStorage.getItem("todos") || '[]') : [
-    {id: 1, title: 'Todo 1', category: "trabajo" ,description: "wast" ,completed: false},
-    {id: 2, title: 'Todo 2', category: "trabajo", description: "wast", completed: false},
-    {id: 3, title: 'Todo 3', category: "trabajo", description: "wast", completed: false},
-    {id: 4, title: 'Todo 4', category: "trabajo", description: "wast", completed: false},
-    {id: 5, title: 'Todo 5', category: "trabajo",  description: "wast", completed: true},
-  ];
 
   user = {} as User;
 
@@ -37,8 +28,6 @@ export class TodoService {
   }
 
   addTodo(todo: Todo){
-    this.todos.push(todo);
-    localStorage.setItem("todos", JSON.stringify(this.todos));
 
     return this.getTodosCollection().add(todo);
   }
