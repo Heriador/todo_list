@@ -1,13 +1,23 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>auth</ion-title>
+    <ion-title>sign-up</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-
   <div class="d-flex-center">
-    <form [formGroup]="loginForm" class="auth-form" >
+    <form [formGroup]="signUpForm" class="auth-form" (ngSubmit)="signUp()" >
+      <app-custom-input 
+        icon="person-outline"
+        label="Nombre de usuario"
+        type="text"
+        [control]="username"
+      ></app-custom-input>
+
+      <div class="validators" *ngIf="getErrorMessage(username)">
+        {{ getErrorMessage(username) }}
+      </div>
+
       <app-custom-input 
         icon="mail-outline"
         label="Email"
@@ -25,26 +35,17 @@
         type="password"
         [control]="password"
       ></app-custom-input>
+
       <div class="validators" *ngIf="getErrorMessage(password)">
         {{ getErrorMessage(password) }}
       </div>
-
       <ion-button 
         expand="block" 
         mode="ios" 
         class="submit" 
         type="submit" 
-        [disabled]="loginForm.invalid"
-        (click)="login()"
+        [disabled]="signUpForm.invalid"
       >
-        Ingregar
-        <ion-icon 
-          slot="end"
-          name="log-in-outline"
-        ></ion-icon>
-      </ion-button>
-
-      <ion-button class="ion-margin-top" routerLink="sign-up" expand="block" mode="ios" fill="outline">
         Registrate
         <ion-icon 
           slot="end"
@@ -52,6 +53,13 @@
         ></ion-icon>
       </ion-button>
 
+      <ion-button class="ion-margin-top" routerLink=".." expand="block" mode="ios" fill="outline">
+        Inicia sesión
+        <ion-icon 
+          slot="end"
+          name="log-in-outline"
+        ></ion-icon>
+      </ion-button>
     </form>
   </div>
 </ion-content>
