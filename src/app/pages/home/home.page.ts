@@ -12,7 +12,7 @@ import { UtilsService } from 'src/app/services/utils/utils.service';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
 
   public createTodoForm: FormGroup;
   public todos: Todo[] = [];
@@ -22,6 +22,7 @@ export class HomePage {
   isModalOpen: boolean = false;
 
   user = {} as User;
+  loading!: HTMLIonLoadingElement;
 
   constructor(
     private readonly todoService: TodoService,
@@ -39,6 +40,9 @@ export class HomePage {
 
   }
 
+  async ngOnInit() {
+    this.loading = await this.utilsService.loading();
+  }
 
   ionViewWillEnter() {
     this.getCategories();
@@ -75,8 +79,7 @@ export class HomePage {
 
   async getTodos(){
 
-    const loading = await this.utilsService.loading();
-    await loading.present();
+    await this.loading.present();
 
     let sub = this.todoService.getTodos().subscribe({
       next: (todos: Todo[]) => {
@@ -101,15 +104,14 @@ export class HomePage {
     });
 
     sub.add(() => {
-      loading.dismiss();
+      this.loading.dismiss();
     });
 
   }
 
   async getCategories(){
 
-    const loading = await this.utilsService.loading();
-    await loading.present();
+    await this.loading.present();
 
     let sub = this.categoryService.getCategories().subscribe({
       next: (response) => {
@@ -129,11 +131,12 @@ export class HomePage {
     })
 
     sub.add(() => {
-      loading.dismiss();
+      this.loading.dismiss();
     })
   }
 
-  remove(todo: Todo){
+  async remove(todo: Todo){
+    await this.loading.present();
     this.todoService.deleteTodo(todo).then(()=> {
       this.utilsService.presentToast({
         message: 'Tarea eliminada',
@@ -152,6 +155,9 @@ export class HomePage {
         color: 'danger',
         position: 'top'
       })
+    })
+    .finally(() => {
+      this.loading.dismiss();
     });
   }
 
@@ -161,8 +167,7 @@ export class HomePage {
       this.createTodoForm.markAllAsTouched();
     }
 
-    const loading = await this.utilsService.loading();
-    await loading.present();
+    await this.loading.present();
 
     this.todoService.addTodo(this.createTodoForm.value).then((response) => {
       console.log(response);
@@ -183,7 +188,6 @@ export class HomePage {
         category: ''
       });
       this.closeModal()
-      loading.dismiss();
     })
     .catch((error) => {
       this.utilsService.presentToast({
@@ -192,11 +196,15 @@ export class HomePage {
         color: 'danger',
         position: 'top'
       })
+    })
+    .finally(() => {
+      this.loading.dismiss();
     });
 
   }
 
-  markAsCompleted(todo: Todo){
+  async markAsCompleted(todo: Todo){
+    await this.loading.present();
     this.todoService.changeCompletedStatus(todo.id).then(() => {
       this.utilsService.presentToast({
         message: 'Tarea completada',
@@ -214,6 +222,9 @@ export class HomePage {
         color: 'danger',
         position: 'top'
       })
+    })
+    .finally(() => {
+      this.loading.dismiss();
     });
   }
 

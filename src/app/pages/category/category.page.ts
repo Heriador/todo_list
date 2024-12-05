@@ -21,6 +21,8 @@ export class CategoryPage implements OnInit {
   isUpdateModalOpen: boolean = false;
   private selectedCategory: Category | null = null;
 
+  loading!: HTMLIonLoadingElement;
+
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly categoryService: CategoryService,
@@ -33,13 +35,15 @@ export class CategoryPage implements OnInit {
     })
 
     this.updateCategoryForm = this.formBuilder.group({
+      id: [''],
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]]
     })
 
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.loading = await this.utilsService.loading();
   }
 
   ionViewWillEnter() {
@@ -85,8 +89,7 @@ export class CategoryPage implements OnInit {
       this.createCategoryForm.markAllAsTouched();
       
     }
-    const loading = await this.utilsService.loading();
-    await loading.present();
+    await this.loading.present();
 
     this.categoryService.addCategory(this.createCategoryForm.value).then((response) => {
       console.log(response);
@@ -105,7 +108,6 @@ export class CategoryPage implements OnInit {
         description: ''
       });
       this.closeModal()
-      loading.dismiss();
     })
     .catch((error) => {
       this.utilsService.presentToast({
@@ -114,8 +116,10 @@ export class CategoryPage implements OnInit {
         color: 'danger',
         position: 'top'
       })
+    })
+    .finally(() => {
+      this.loading.dismiss();
     });
-    ;
   }
 
   async getCategories(){
@@ -145,7 +149,9 @@ export class CategoryPage implements OnInit {
     })
   }
 
-  deleteCategory(category: Category){
+  async deleteCategory(category: Category){
+
+    await this.loading.present();
     this.categoryService.deleteCategory(category).then(() => {
       this.utilsService.presentToast({
         message: 'Categoria eliminada',
@@ -162,14 +168,19 @@ export class CategoryPage implements OnInit {
         color: 'danger',
         position: 'top'
       })
+    })
+    .finally(() => {
+      this.loading.dismiss();
     });
   }
 
-  updateCategory(){
+  async updateCategory(){
     if(this.updateCategoryForm.invalid){
       this.updateCategoryForm.markAllAsTouched();
     }
 
+
+    await this.loading.present();
     this.categoryService.updateCategory(this.updateCategoryForm.value)
       .then(() => {
         this.utilsService.presentToast({
@@ -185,13 +196,17 @@ export class CategoryPage implements OnInit {
         this.closeUpdateModal();
         this.getCategories();
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         this.utilsService.presentToast({
           message: 'Error al actualizar la categoria',
           duration: 2000,
           color: 'danger',
           position: 'top'
         })
+      })
+      .finally(() => {
+        this.loading.dismiss();
       });
   }
 
@@ -203,6 +218,7 @@ export class CategoryPage implements OnInit {
     this.isUpdateModalOpen = true;
     this.selectedCategory = category;
     this.updateCategoryForm.patchValue({
+      id: category.id,
       name: category.name,
       description: category.description
     })
