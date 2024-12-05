@@ -62,6 +62,9 @@ this will generate an optimized build with all the necesary files to run in andr
 
 it also generates an APK for the project in the route platforms/android/app/build/outputs/apk/debug
 
+## IOS Setup
+
+the project has an initial configuration for ios build but as i don't have acces to MacOs machine or know how to emulate it properly i couldn't make a build to test it, but if you have one an can do the build feel free to do it!
 
 ## Questions
 
