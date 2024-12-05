@@ -80,11 +80,13 @@ export class CategoryPage implements OnInit {
     return '';
   }
 
-  addCategory(){
+  async addCategory(){
     if(this.createCategoryForm.invalid){
       this.createCategoryForm.markAllAsTouched();
       
     }
+    const loading = await this.utilsService.loading();
+    await loading.present();
 
     this.categoryService.addCategory(this.createCategoryForm.value).then((response) => {
       console.log(response);
@@ -94,11 +96,16 @@ export class CategoryPage implements OnInit {
         color: 'success',
         position: 'top'
       })
+
+      this.categories.push({id: response.id, ...this.createCategoryForm.value});
+
+
       this.createCategoryForm.reset({
         name: '',
         description: ''
       });
       this.closeModal()
+      loading.dismiss();
     })
     .catch((error) => {
       this.utilsService.presentToast({
@@ -139,7 +146,23 @@ export class CategoryPage implements OnInit {
   }
 
   deleteCategory(category: Category){
-    this.categoryService.deleteCategory(category);
+    this.categoryService.deleteCategory(category).then(() => {
+      this.utilsService.presentToast({
+        message: 'Categoria eliminada',
+        duration: 2000,
+        color: 'success',
+        position: 'top'
+      })
+      this.categories = this.categories.filter(c => c.id !== category.id);
+    })
+    .catch(() => {
+      this.utilsService.presentToast({
+        message: 'Error al eliminar la categoria',
+        duration: 2000,
+        color: 'danger',
+        position: 'top'
+      })
+    });
   }
 
   updateCategory(){
